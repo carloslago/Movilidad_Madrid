@@ -1,6 +1,7 @@
 package com.example.android.movilidad_madrid;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
 import android.provider.Settings;
@@ -10,6 +11,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -57,30 +59,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        } else {
-            requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
+        SharedPreferences settings = getSharedPreferences(LoginActivity.PREFS_NAME, 0);
+        boolean hasLoggedIn = settings.getBoolean("hasLoggedIn", false);
 
-        builder.setLatLngBounds(new LatLngBounds(new LatLng(42.0, -3.0), new LatLng(45.0, -5.0)));
-        try {
-            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
-        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
+//        Log.d("a", ""+hasLoggedIn);
+//        SharedPreferences.Editor editor = settings.edit();
+//        editor.putBoolean("hasLoggedIn", true);
+//        editor.commit();
+
+        if (hasLoggedIn){
+            setContentView(R.layout.activity_maps);
+            // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+            } else {
+                requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+            mGoogleApiClient = new GoogleApiClient
+                    .Builder(this)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .enableAutoManage(this, this)
+                    .build();
+
+            builder.setLatLngBounds(new LatLngBounds(new LatLng(42.0, -3.0), new LatLng(45.0, -5.0)));
+            try {
+                startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+            } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+                e.printStackTrace();
+            }
+        } else {
+            startActivity(new Intent(MapsActivity.this, LoginActivity.class));
         }
+
 
     }
 
