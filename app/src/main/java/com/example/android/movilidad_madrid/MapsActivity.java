@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 
 import org.neo4j.driver.v1.*;
@@ -41,6 +42,7 @@ import static org.neo4j.driver.v1.Values.parameters;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnConnectionFailedListener {
@@ -64,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 //        Log.d("a", ""+hasLoggedIn);
 //        SharedPreferences.Editor editor = settings.edit();
-//        editor.putBoolean("hasLoggedIn", true);
+//        editor.putBoolean("hasLoggedIn", false);
 //        editor.commit();
 
         if (hasLoggedIn){
@@ -98,6 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
