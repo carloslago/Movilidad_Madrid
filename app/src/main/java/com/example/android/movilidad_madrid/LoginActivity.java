@@ -3,6 +3,7 @@ package com.example.android.movilidad_madrid;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -32,18 +33,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-
-import com.mongodb.Block;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoDatabase;
-
-import org.bson.Document;
-import org.bson.conversions.Bson;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -76,6 +78,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
 
     public static final String PREFS_NAME = "MyPrefsFile";
+
+    private String password_login = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +162,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
+
+
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -186,30 +192,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             UsernameView.setError("Debes introducir un usuario");
             focusView = UsernameView;
             cancel = true;
-        } else if (!isEmailValid(username)) {
-            UsernameView.setError("El usuario es incorrecto");
-            focusView = UsernameView;
-            cancel = true;
         }
-        try {
-            Log.d("a", "Llego");
-            MongoClient mongoClient = new MongoClient("localhost", 28000);
-            Log.d("a", "Llego2");
-            MongoDatabase db = mongoClient.getDatabase("Usuarios");
-            Document iterable = db.getCollection("usuario").findOneAndUpdate(
-                    new Document("usuario", username), new Document("isUser", true));
 
-            if (iterable.get("password") == password) {
-                cancel = false;
-            }
-        } catch (Exception e){
+        //get request
+        try {
+            new GetDataTask().execute("http://192.168.56.1:1000/api/status?username=" + username).get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
+        }
+        if (password.equals(password_login)){
+            cancel = false;
+        } else {
+            cancel = true;
         }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
-            focusView.requestFocus();
+//            focusView.requestFocus();
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
@@ -224,6 +224,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             editor.commit();
             startActivity(new Intent(LoginActivity.this, MapsActivity.class));
         }
+    }
+
+    private void resultado_login(String password){
+        password_login = password;
     }
 
     private boolean isEmailValid(String email) {
@@ -380,6 +384,79 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+    }
+
+    class GetDataTask extends AsyncTask<String, Void, String>{
+
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+
+            super.onPreExecute();
+
+            progressDialog = new ProgressDialog(LoginActivity.this);
+            progressDialog.setMessage("Logeando usuario...");
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try{
+                return getData(params[0]);
+            } catch (IOException e){
+                return "Network error!";
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
+
+            String password = "";
+            s = s.replace("[", "").replace("[", "");
+            String[] partes = s.split(",");
+            String[] partes_parte;
+            for (String parte: partes){
+                partes_parte = parte.split(":");
+                partes_parte[0] = partes_parte[0].replace("\"", "");
+                partes_parte[1] = partes_parte[1].replace("\"", "");
+                if ("password".equals(partes_parte[0])){
+                    password = partes_parte[1];
+                }
+            }
+            resultado_login(password);
+        }
+
+        private String getData(String urlPath) throws IOException{
+            StringBuilder result = new StringBuilder();
+            //Initialize and config request, then connect to server
+            try{
+                URL url = new URL(urlPath);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(10000);
+                urlConnection.setConnectTimeout(10000);
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setRequestProperty("Content-Type", "application/json"); //header
+                urlConnection.connect();
+
+                //Read data response
+                InputStream inputStream = urlConnection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = bufferedReader.readLine()) != null){
+                    result.append(line).append("\n");
+                }
+            } catch (IOException e){
+                return "Network error !";
+            }
+            return result.toString();
         }
     }
 }
