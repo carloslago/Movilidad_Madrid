@@ -109,6 +109,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        Button mRegisterButton = (Button) findViewById(R.id.register);
+        mRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                attempRegister();
+            }
+        });
+
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
@@ -157,13 +165,58 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
 
+
+
+    private void attempRegister(){
+        if (mAuthTask != null) {
+            return;
+        }
+
+        // Reset errors.
+        UsernameView.setError(null);
+        mPasswordView.setError(null);
+
+        // Store values at the time of the login attempt.
+        String username = UsernameView.getText().toString();
+        String password = mPasswordView.getText().toString();
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid password, if the user entered one.
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+            mPasswordView.setError("Introduce una contraseña");
+            focusView = mPasswordView;
+            cancel = true;
+        }
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(username)) {
+            UsernameView.setError("Debes introducir un usuario");
+            focusView = UsernameView;
+            cancel = true;
+        }
+
+        try {
+            new GetDataTask().execute("http://192.168.56.1:1000/api/status?username=" + username).get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (password_login.equals("")){
+
+
+            startActivity(new Intent(LoginActivity.this, LoginActivity.class));
+        } else {
+            UsernameView.setError("El usuario ya existe");
+        }
+
+
+    }
+
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-
-
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -420,16 +473,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             String password = "";
-            s = s.replace("[", "").replace("[", "");
-            String[] partes = s.split(",");
-            String[] partes_parte;
-            for (String parte: partes){
-                partes_parte = parte.split(":");
-                partes_parte[0] = partes_parte[0].replace("\"", "");
-                partes_parte[1] = partes_parte[1].replace("\"", "");
-                if ("password".equals(partes_parte[0])){
-                    password = partes_parte[1];
+            if (s.length() > 5){
+                s = s.replace("[", "").replace("[", "");
+                String[] partes = s.split(",");
+                String[] partes_parte;
+                for (String parte: partes){
+                    partes_parte = parte.split(":");
+                    partes_parte[0] = partes_parte[0].replace("\"", "");
+                    partes_parte[1] = partes_parte[1].replace("\"", "");
+                    if ("password".equals(partes_parte[0])){
+                        password = partes_parte[1];
+                    }
                 }
+            } else {
+                password = "";
             }
             resultado_login(password);
         }

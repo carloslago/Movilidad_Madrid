@@ -95,7 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 e.printStackTrace();
             }
         } else {
-            startActivity(new Intent(MapsActivity.this, LoginActivity.class));
+            startActivity(new Intent(MapsActivity.this, MenuActivity.class));
         }
 
 
