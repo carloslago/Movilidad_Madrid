@@ -87,6 +87,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public static final String PREFS_NAME = "MyPrefsFile";
 
     private String password_login = "";
+    private String id_user = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -276,14 +277,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(true);
             mAuthTask = new UserLoginTask(username, password);
             mAuthTask.execute((Void) null);
-            SharedPreferences settings = getSharedPreferences(LoginActivity.PREFS_NAME, 0); // 0 - for private mode
-            SharedPreferences.Editor editor = settings.edit();
 
-            editor.putBoolean("hasLoggedIn", true);
 
-            editor.apply();
-//            startActivity(new Intent(LoginActivity.this, MapsActivity.class));
-            startActivity(new Intent(LoginActivity.this, MenuActivity.class));
+//            SharedPreferences settings = getSharedPreferences(LoginActivity.PREFS_NAME, 0); // 0 - for private mode
+//            SharedPreferences.Editor editor = settings.edit();
+//
+//            editor.putBoolean("hasLoggedIn", true);
+//
+//            editor.apply();
+
+
+            Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+            intent.putExtra("ID_USUARIO", id_user);
+            startActivity(intent);
         }
     }
 
@@ -355,29 +361,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        addEmailsToAutoComplete(emails);
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
 
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        UsernameView.setAdapter(adapter);
     }
 
 
@@ -391,11 +381,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+
+    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
@@ -480,22 +467,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 progressDialog.dismiss();
             }
 
+
             String password = "";
+            String id = "";
             if (s.length() > 5){
                 s = s.replace("[", "").replace("[", "");
                 String[] partes = s.split(",");
                 String[] partes_parte;
+                id = partes[0].split(":")[1].replace("\"", "").replace(",","");
                 for (String parte: partes){
                     partes_parte = parte.split(":");
-                    partes_parte[0] = partes_parte[0].replace("\"", "");
-                    partes_parte[1] = partes_parte[1].replace("\"", "");
-                    if ("password".equals(partes_parte[0])){
-                        password = partes_parte[1];
+                    if (partes_parte.length > 1){
+                        partes_parte[0] = partes_parte[0].replace("\"", "");
+                        partes_parte[1] = partes_parte[1].replace("\"", "");
+                        if ("password".equals(partes_parte[0])){
+                            password = partes_parte[1];
+                        }
                     }
                 }
             } else {
                 password = "";
+                id = "";
             }
+            id_user = id;
             resultado_login(password);
         }
 

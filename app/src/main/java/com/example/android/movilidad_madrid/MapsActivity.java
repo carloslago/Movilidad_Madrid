@@ -21,6 +21,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -55,19 +56,26 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.neo4j.driver.v1.*;
 import org.w3c.dom.Document;
 
@@ -127,7 +135,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        } else {
 //            startActivity(new Intent(MapsActivity.this, LoginActivity.class));
 //        }
-
 
     }
 
@@ -202,12 +209,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         buildGoogleApiClient();
-        // Add a marker in Sydney and move the camera
 
-//        LatLng madrid = new LatLng(40.416733, -3.703313);
-//        mMap.addMarker(new MarkerOptions().position(madrid).title("Madrid"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(madrid));
-//        CameraUpdateFactory.newLatLngZoom(new LatLng(40.416733, -3.703313), 5);
+        Button retorno = (Button) findViewById(R.id.retorno);
+        retorno.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, MenuActivity.class);
+                intent.putExtra("ID_USUARIO", getIntent().getStringExtra("ID_USUARIO"));
+                startActivity(intent);
+            }
+        });
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.416733, -3.703313), 10));
     }
 
@@ -240,12 +251,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        Driver driver = GraphDatabase.driver("bolt://hobby-ebblnhmhoeaggbkepcpfeipl.dbs.graphenedb.com:24786", AuthTokens.basic("root", "b.kw8DoVqt3lgi.wqQn17S5BBkUwGXA"));
 
-//        RestAPI graphDb = new RestAPIFacade("http://10.0.2.2:7474/db/data");
-//        QueryEngine engine =new RestCypherQueryEngine(graphDb);
-//        Session session = driver.session();
-//        engine.query("create (p:Person {name:\"Steve\"}) return p", Collections.EMPTY_MAP);
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 place = PlacePicker.getPlace(data, this);
@@ -259,8 +265,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-//        session.close();
-//        driver.close();
     }
 
     @Override
@@ -376,6 +380,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(markerOptions);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitud, longitud), 17));
 
+            Log.d("id->", getIntent().getStringExtra("ID_USUARIO"));
+            new PutDataTask().execute("http://192.168.56.1:1000/api/status/" + getIntent().getStringExtra("ID_USUARIO"));
 
             GoogleDirection.withServerKey("AIzaSyBhRVb2drWix_RLzBCoiu1upZZrNvv5XTs")
                     .from(new LatLng(latitud, longitud))
@@ -441,6 +447,92 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         });
             }
 
+
+        }
+    }
+
+
+    class PutDataTask extends AsyncTask<String, Void, String>{
+
+
+        ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            progressDialog = new ProgressDialog(MapsActivity.this);
+            progressDialog.setMessage("Procesando...");
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                return putData(params[0]);
+            } catch (IOException e){
+                return "Network error!";
+            } catch (JSONException e){
+                return "Datos incorrectos";
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
+        }
+
+        private String putData(String urlPath) throws IOException, JSONException{
+
+            StringBuilder result = new StringBuilder();
+            BufferedWriter bufferedWriter = null;
+            BufferedReader bufferedReader = null;
+
+            try {
+                JSONObject dataToSend = new JSONObject();
+//                Collection<JSONObject> items = new ArrayList<JSONObject>();
+//                items.add(item1);
+                JSONArray list = new JSONArray();
+                list.put(place.getName() + ", " +  place.getAddress());
+                dataToSend.put("Destinos_recientes", list);
+//                dataToSend.put("password", mPasswordView.getText().toString());
+//                dataToSend.put("Destinos_recientes", "Pepe");
+
+                Log.d("json->", dataToSend.toString());
+                // Iniciar request
+                URL url = new URL(urlPath);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setReadTimeout(10000);
+                urlConnection.setConnectTimeout(10000);
+                urlConnection.setRequestMethod("PUT");
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestProperty("Content-Type", "application/json"); //header
+                urlConnection.connect();
+
+                // Escribir datos
+                OutputStream outputStream = urlConnection.getOutputStream();
+                bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+                bufferedWriter.write(dataToSend.toString());
+                bufferedWriter.flush();
+
+                // Comprobar
+                if (urlConnection.getResponseCode() == 200){
+                    return "Funciona";
+                } else {
+                    return "Error al actualizar";
+                }
+            } finally {
+                if (bufferedReader != null){
+                    bufferedReader.close();
+                }
+                if (bufferedWriter != null){
+                    bufferedWriter.close();
+                }
+            }
 
         }
     }
