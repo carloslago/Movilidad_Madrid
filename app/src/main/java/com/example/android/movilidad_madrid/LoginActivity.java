@@ -281,7 +281,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             editor.putBoolean("hasLoggedIn", true);
 
-            editor.commit();
+            editor.apply();
             startActivity(new Intent(LoginActivity.this, MapsActivity.class));
         }
     }
