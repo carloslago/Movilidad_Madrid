@@ -88,6 +88,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private String password_login = "";
     private String id_user = "";
+    private String destinos;
+    private String favoritos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -289,6 +291,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
             intent.putExtra("ID_USUARIO", id_user);
+            intent.putExtra("DESTINOS", destinos);
+            intent.putExtra("FAVORITOS", favoritos);
             startActivity(intent);
         }
     }
@@ -483,12 +487,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         if ("password".equals(partes_parte[0])){
                             password = partes_parte[1];
                         }
+                        if ("Destinos_recientes".equals(partes_parte[0])){
+                            destinos = partes_parte[1].replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").replace("}", "");
+                        }
+                        if ("Favoritos".equals(partes_parte[0])){
+                            favoritos = partes_parte[1].replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "").replace("}", "");
+                        }
                     }
                 }
             } else {
                 password = "";
                 id = "";
             }
+
             id_user = id;
             resultado_login(password);
         }

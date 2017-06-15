@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.android.movilidad_madrid.FavoritosActivity"
+    android:background="@color/blue">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="70dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/d1"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/d2"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/d3"
+                android:layout_width="match_parent"
+                android:layout_height="86dp"
+                android:textSize="24sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/retorno"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Volver al Menu" />
+
+</android.support.design.widget.CoordinatorLayout>

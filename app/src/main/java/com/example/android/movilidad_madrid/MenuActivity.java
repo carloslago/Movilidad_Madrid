@@ -87,12 +87,23 @@ public class MenuActivity extends AppCompatActivity
         if (id == R.id.nav_search) {
             Intent intent = new Intent(MenuActivity.this, MapsActivity.class);
             intent.putExtra("ID_USUARIO", getIntent().getStringExtra("ID_USUARIO"));
+            intent.putExtra("DESTINOS", getIntent().getStringExtra("DESTINOS"));
+            intent.putExtra("FAVORITOS", getIntent().getStringExtra("FAVORITOS"));
             startActivity(intent);
 //            startActivity(new Intent(MenuActivity.this, MapsActivity.class));
         } else if (id == R.id.nav_Recientes) {
+            Intent intent = new Intent(MenuActivity.this, DestinosRecientesActivity.class);
+            intent.putExtra("ID_USUARIO", getIntent().getStringExtra("ID_USUARIO"));
+            intent.putExtra("DESTINOS", getIntent().getStringExtra("DESTINOS"));
+            intent.putExtra("FAVORITOS", getIntent().getStringExtra("FAVORITOS"));
+            startActivity(intent);
 
         } else if (id == R.id.nav_favourite) {
-
+            Intent intent = new Intent(MenuActivity.this, FavoritosActivity.class);
+            intent.putExtra("ID_USUARIO", getIntent().getStringExtra("ID_USUARIO"));
+            intent.putExtra("DESTINOS", getIntent().getStringExtra("DESTINOS"));
+            intent.putExtra("FAVORITOS", getIntent().getStringExtra("FAVORITOS"));
+            startActivity(intent);
         } else if (id == R.id.nav_exit_to_app) {
             SharedPreferences settings = getSharedPreferences(LoginActivity.PREFS_NAME, 0);
             boolean hasLoggedIn = settings.getBoolean("hasLoggedIn", false);

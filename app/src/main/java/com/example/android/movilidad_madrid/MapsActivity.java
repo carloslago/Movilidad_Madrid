@@ -102,6 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mLastLocation;
     private Marker mCurrLocationMarker;
     private LatLng destino;
+    private String destinos_rec;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,6 +217,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, MenuActivity.class);
                 intent.putExtra("ID_USUARIO", getIntent().getStringExtra("ID_USUARIO"));
+                if (place != null){
+                    intent.putExtra("DESTINOS", place.getName());
+                } else {
+                    intent.putExtra("DESTINOS", getIntent().getStringExtra("DESTINOS"));
+                }
+                intent.putExtra("FAVORITOS", getIntent().getStringExtra("FAVORITOS"));
                 startActivity(intent);
             }
         });
@@ -381,6 +388,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitud, longitud), 17));
 
             Log.d("id->", getIntent().getStringExtra("ID_USUARIO"));
+            destinos_rec = getIntent().getStringExtra("DESTINOS");
             new PutDataTask().execute("http://192.168.56.1:1000/api/status/" + getIntent().getStringExtra("ID_USUARIO"));
 
             GoogleDirection.withServerKey("AIzaSyBhRVb2drWix_RLzBCoiu1upZZrNvv5XTs")
@@ -497,7 +505,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                Collection<JSONObject> items = new ArrayList<JSONObject>();
 //                items.add(item1);
                 JSONArray list = new JSONArray();
-                list.put(place.getName() + ", " +  place.getAddress());
+//                for (String d: destinos_rec.split(",")){
+//                    d = d.replace("\\n", "").replaceAll("\\\\", "");
+//                    list.put(d);
+//                }
+//                String[] d = getIntent().getStringExtra("DESTINOS").replace("\"", "").replace("[", "").replace("[", "").replace("}", "").split(",");
+//                for (String sitio: d){
+//                    list.put(sitio);
+//                }
+                list.put(place.getName());
+
                 dataToSend.put("Destinos_recientes", list);
 //                dataToSend.put("password", mPasswordView.getText().toString());
 //                dataToSend.put("Destinos_recientes", "Pepe");
