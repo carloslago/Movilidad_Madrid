@@ -78,6 +78,7 @@ public class DestinosRecientesActivity extends AppCompatActivity {
 
     }
 
+    // Actualizar favoritos
     class PutDataTask extends AsyncTask<String, Void, String> {
 
 

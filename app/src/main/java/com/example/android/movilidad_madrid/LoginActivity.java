@@ -176,7 +176,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
 
-
+    // Registro
     private void attempRegister(){
         if (mAuthTask != null) {
             return;
@@ -222,11 +222,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
+    // Login
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -279,14 +275,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(true);
             mAuthTask = new UserLoginTask(username, password);
             mAuthTask.execute((Void) null);
-
-
-//            SharedPreferences settings = getSharedPreferences(LoginActivity.PREFS_NAME, 0); // 0 - for private mode
-//            SharedPreferences.Editor editor = settings.edit();
-//
-//            editor.putBoolean("hasLoggedIn", true);
-//
-//            editor.apply();
 
 
             Intent intent = new Intent(LoginActivity.this, MenuActivity.class);

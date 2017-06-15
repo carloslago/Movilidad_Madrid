@@ -23,15 +23,6 @@ public class MenuActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
 
-//        SharedPreferences settings = getSharedPreferences(LoginActivity.PREFS_NAME, 0);
-//        boolean hasLoggedIn = settings.getBoolean("hasLoggedIn", false);
-
-//        Log.d("a", ""+hasLoggedIn);
-//        SharedPreferences.Editor editor = settings.edit();
-//        editor.putBoolean("hasLoggedIn", false);
-//        editor.apply();
-//        hasLoggedIn = false;
-//        if (hasLoggedIn){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -46,9 +37,7 @@ public class MenuActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-//        } else {
-//            startActivity(new Intent(MenuActivity.this, LoginActivity.class));
-//        }
+
     }
 
     @Override
@@ -105,12 +94,6 @@ public class MenuActivity extends AppCompatActivity
             intent.putExtra("FAVORITOS", getIntent().getStringExtra("FAVORITOS"));
             startActivity(intent);
         } else if (id == R.id.nav_exit_to_app) {
-            SharedPreferences settings = getSharedPreferences(LoginActivity.PREFS_NAME, 0);
-            boolean hasLoggedIn = settings.getBoolean("hasLoggedIn", false);
-            Log.d("a", ""+hasLoggedIn);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean("hasLoggedIn", false);
-            editor.apply();
             startActivity(new Intent(MenuActivity.this, LoginActivity.class));
         }
 
